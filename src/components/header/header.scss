@@ -1,0 +1,16 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 200px;
+    background-color: black;
+    box-shadow: 5px 2px 15px gray;
+
+    &__title {
+        font-size: 64px;
+        font-weight: 600;
+        letter-spacing: .25em;
+        color: white;
+    }
+}
