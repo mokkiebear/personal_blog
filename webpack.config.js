@@ -1,61 +1,75 @@
 const path = require("path");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
 
-module.exports = {
-  // The application entry point
-  entry: "./src/index.tsx",
-  output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "bundle.js",
-  },
-  resolve: {
-    modules: [path.join(__dirname, "src"), "node_modules"],
-    alias: {
-      react: path.join(__dirname, "node_modules", "react"),
+module.exports = (env) => {
+  const isProduction = env === "production";
+  return {
+    entry: "./src/index.tsx",
+
+    mode: "development",
+
+    output: {
+      path: path.resolve(__dirname, "dist"),
+      filename: "bundle.min.js",
+      publicPath: "/",
     },
-    extensions: [".tsx", ".ts", ".js"],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+
+    resolve: {
+      modules: [path.join(__dirname, "src"), "node_modules"],
+      alias: {
+        react: path.join(__dirname, "node_modules", "react"),
+        src: path.join(__dirname, "src"),
+        components: path.join(__dirname, "src/components"), 
       },
-      {
-        test: /\.s[ac]ss$/i,
-        use: [
-          // Creates `style` nodes from JS strings
-          "style-loader",
-          // Translates CSS into CommonJS
-          "css-loader",
-          // Compiles Sass to CSS
-          "sass-loader",
-        ],
-      },
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
+      extensions: [".tsx", ".ts", ".js", ".scss"],
+    },
+
+    module: {
+      rules: [
+        {
+          test: /\.tsx?$/,
+          loader: "ts-loader",
+          include: [path.resolve(__dirname, "src")],
+          exclude: /node_modules/,
         },
-      },
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader: "style-loader",
+        {
+          test: /\.s[ac]ss$/i,
+          use: ["style-loader", "css-loader", "sass-loader"],
+        },
+        {
+          test: /\.css$/,
+          use: ["style-loader", "css-loader"],
+        },
+        {
+          test: /\.(png|jpe?g|gif)$/i,
+          use: [
+            {
+              loader: "file-loader",
+            },
+          ],
+        },
+        {
+          test: /\.ejs$/,
+          loader: "ejs-loader",
+          options: {
+            variable: 'data',
+            interpolate : '\\{\\{(.+?)\\}\\}',
+            evaluate : '\\[\\[(.+?)\\]\\]'
           },
-          {
-            loader: "css-loader",
-          },
-        ],
-      },
+        },
+      ],
+    },
+
+    plugins: [
+      new webpack.ProgressPlugin(),
+      new HtmlWebPackPlugin({
+        inject: true,
+        template: "./public/index.ejs",
+        templateParameters: {
+          title: "Maxxi's blog",
+        },
+      }),
     ],
-  },
-  plugins: [
-    new HtmlWebPackPlugin({
-      template: "./src/index.html",
-    }),
-  ],
+  };
 };
