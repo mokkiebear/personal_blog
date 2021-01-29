@@ -5,4 +5,4 @@ import 'antd/dist/antd.css';
 
 import { App } from "./app";
 
-render(<App />, document.getElementById("root"));
+render(<App />, document.getElementById("main"));
