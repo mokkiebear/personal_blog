@@ -64,7 +64,9 @@ export const ToDoItem = ({ todo, setTodo }: IProps) => {
   }, [canvas, isDrawing]);
 
   const startDrawing = (
-    event: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+    event:
+      | React.MouseEvent<HTMLCanvasElement, MouseEvent>
+      | React.TouchEvent<HTMLCanvasElement>
   ) => {
     setIsDrawing(true);
   };
@@ -131,6 +133,8 @@ export const ToDoItem = ({ todo, setTodo }: IProps) => {
         ref={canvasRef}
         onMouseDown={(e) => startDrawing(e)}
         onMouseUp={stopDrawing}
+        onTouchStart={(e) => startDrawing(e)}
+        onTouchEnd={stopDrawing}
         className={classNames("todo-item__canvas", {
           [`todo-item__canvas--${
             todo.isCompleted ? "completed" : "not-completed"
