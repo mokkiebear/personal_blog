@@ -9,6 +9,10 @@ module.exports = (env) => {
 
     mode: "development",
 
+    devServer: {
+      historyApiFallback: true,
+    },
+
     output: {
       path: path.resolve(__dirname, "dist"),
       filename: "bundle.min.js",
@@ -20,7 +24,7 @@ module.exports = (env) => {
       alias: {
         react: path.join(__dirname, "node_modules", "react"),
         src: path.join(__dirname, "src"),
-        components: path.join(__dirname, "src/components"), 
+        components: path.join(__dirname, "src/components"),
       },
       extensions: [".tsx", ".ts", ".js", ".scss"],
     },
@@ -53,9 +57,9 @@ module.exports = (env) => {
           test: /\.ejs$/,
           loader: "ejs-loader",
           options: {
-            variable: 'data',
-            interpolate : '\\{\\{(.+?)\\}\\}',
-            evaluate : '\\[\\[(.+?)\\]\\]'
+            variable: "data",
+            interpolate: "\\{\\{(.+?)\\}\\}",
+            evaluate: "\\[\\[(.+?)\\]\\]",
           },
         },
       ],

@@ -1,0 +1,23 @@
+.todo-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &__header {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    &__group {
+        font-size: 20px;
+        font-weight: bold;
+
+        &--completed {
+            color: red;
+        }
+
+        &--not-completed {
+            color: green;
+        }
+    }
+}

@@ -3,6 +3,6 @@ import { render } from "react-dom";
 
 import 'antd/dist/antd.css';
 
-import { App } from "./app";
+import { App } from "./App";
 
 render(<App />, document.getElementById("main"));
