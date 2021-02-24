@@ -1,0 +1,25 @@
+.todo-item {
+  position: relative;
+
+  &__text {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    user-select: none;
+  }
+
+  &__canvas {
+    margin: 0;
+    padding: 0;
+    border: 2px solid black;
+    background: white;
+    transition: background 1s;
+
+    &--completed {
+      background: rgba(23, 204, 23, 0.53);
+    }
+
+    &--not-completed {
+    }
+  }
+}
