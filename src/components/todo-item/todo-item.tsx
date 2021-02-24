@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 
-import "./todo.scss";
 import { ITodoItem } from "components/todo-list/todo-list";
+
+import "./todo.scss";
 
 const CANVAS_HEIGHT = 40;
 const CANVAS_WIDTH = 200;
@@ -65,11 +66,7 @@ export const ToDoItem = ({ todo, setTodo }: IProps) => {
     };
   }, [canvas, isDrawing]);
 
-  const startDrawing = (
-    event:
-      | React.MouseEvent<HTMLCanvasElement, MouseEvent>
-      | React.TouchEvent<HTMLCanvasElement>
-  ) => {
+  const startDrawing = () => {
     setIsDrawing(true);
   };
 
@@ -79,7 +76,11 @@ export const ToDoItem = ({ todo, setTodo }: IProps) => {
     countPixels();
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+  const draw = (
+    e:
+      | React.MouseEvent<HTMLCanvasElement, MouseEvent>
+      | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     if (!isDrawing || !canvasCtx) {
       return;
     }
@@ -101,13 +102,22 @@ export const ToDoItem = ({ todo, setTodo }: IProps) => {
   };
 
   const getMousePosition = (
-    event: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+    event:
+      | React.MouseEvent<HTMLCanvasElement, MouseEvent>
+      | React.TouchEvent<HTMLCanvasElement>
   ) => {
     const rect = canvas.getBoundingClientRect();
-    return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    };
+    if (event instanceof MouseEvent) {
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+      };
+    } else if (event instanceof TouchEvent) {
+      return {
+        x: event.touches[0].clientX - rect.left,
+        y: event.touches[0].clientY - rect.top,
+      };
+    }
   };
 
   const countPixels = () => {
@@ -133,9 +143,9 @@ export const ToDoItem = ({ todo, setTodo }: IProps) => {
     <div className="todo-item">
       <canvas
         ref={canvasRef}
-        onMouseDown={(e) => startDrawing(e)}
+        onMouseDown={startDrawing}
         onMouseUp={stopDrawing}
-        onTouchStart={(e) => startDrawing(e)}
+        onTouchStart={startDrawing}
         onTouchEnd={stopDrawing}
         className={classNames("todo-item__canvas", {
           [`todo-item__canvas--${
