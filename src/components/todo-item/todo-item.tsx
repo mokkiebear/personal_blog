@@ -58,8 +58,10 @@ export const ToDoItem = ({ todo, setTodo }: IProps) => {
     }
 
     canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("touchmove", draw);
     return () => {
       canvas.removeEventListener("mousemove", draw);
+      canvas.removeEventListener("touchmove", draw);
     };
   }, [canvas, isDrawing]);
 
