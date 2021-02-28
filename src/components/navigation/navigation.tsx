@@ -1,19 +1,14 @@
-import React from "react";
-import { Menu, Button } from "antd";
+import React from 'react';
+import { Menu } from 'antd';
 import {
   AppstoreOutlined,
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
-  PieChartOutlined,
-  DesktopOutlined,
   SettingOutlined,
   CalendarOutlined,
   MailOutlined,
   HomeOutlined,
   UserOutlined,
-} from "@ant-design/icons";
-import { useState } from "react";
-import { useHistory } from "react-router-dom";
+} from '@ant-design/icons';
+import { useHistory } from 'react-router-dom';
 
 const { SubMenu } = Menu;
 
@@ -22,11 +17,11 @@ export const Navigation = () => {
 
   return (
     <div>
-      <Menu defaultSelectedKeys={["home"]} mode="horizontal" theme="light">
+      <Menu defaultSelectedKeys={['home']} mode="horizontal" theme="light">
         <Menu.Item
           key="home"
           icon={<HomeOutlined />}
-          onClick={() => history.push("/")}
+          onClick={() => history.push('/')}
         >
           Главная
         </Menu.Item>
@@ -36,7 +31,7 @@ export const Navigation = () => {
         <Menu.Item
           key="todo"
           icon={<CalendarOutlined />}
-          onClick={() => history.push("/todo")}
+          onClick={() => history.push('/todo')}
         >
           Живой TODO список
         </Menu.Item>

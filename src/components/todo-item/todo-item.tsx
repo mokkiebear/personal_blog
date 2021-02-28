@@ -1,158 +1,167 @@
-import React, { useEffect, useRef, useState } from "react";
-import classNames from "classnames";
+import classNames from 'classnames';
+import { ITodoItem } from 'components/todo-list/todo-list';
+import React, { useCallback, useRef, useState } from 'react';
+import { useEffect } from 'react';
 
-import { ITodoItem } from "components/todo-list/todo-list";
+import './todo-item.scss';
 
-import "./todo.scss";
-
-const CANVAS_HEIGHT = 40;
-const CANVAS_WIDTH = 200;
+const xmlns = 'http://www.w3.org/2000/svg';
 
 interface IProps {
-  todo: ITodoItem;
-  setTodo: (todo: ITodoItem) => void;
+    item: ITodoItem;
+    setItem: (todo: ITodoItem) => void;
 }
 
-export const ToDoItem = ({ todo, setTodo }: IProps) => {
-  const canvasRef = useRef(null);
+export const TodoItem: React.FC<IProps> = ({ item, setItem }) => {
+    const svgRef = useRef<SVGSVGElement>(null);
 
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [lineHistory, setLineHistory] = useState<{ x: number; y: number }[]>(
-    []
-  );
+    const [currentElement, setCurrentElement] = useState<SVGElement>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [history, setHistory] = useState<string[]>([]);
 
-  const [canvas, setCanvas] = useState(null);
-  const [canvasCtx, setCanvasCtx] = useState(null);
+    useEffect(() => {
+        if (item._data.length && svgRef.current) {
+            console.log(item._data);
+            item._data.forEach((pathD) => {
+                const el = createElement('path', {
+                    'stroke-width': 1,
+                    stroke: '#000',
+                    fill: 'none',
+                    d: pathD,
+                });
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    canvas.height = CANVAS_HEIGHT;
-    canvas.width = CANVAS_WIDTH;
-
-    setCanvas(canvas);
-    setCanvasCtx(ctx);
-  }, []);
-
-  useEffect(() => {
-    if (!canvasCtx) {
-      return;
-    }
-
-    if (todo._data.length) {
-      todo._data.forEach((dot: { x: number; y: number }) =>
-        canvasCtx.lineTo(dot.x, dot.y)
-      );
-      canvasCtx.stroke();
-    }
-
-    canvasCtx.fillStyle = "black";
-    canvasCtx.font = "18px Arial";
-    // ctx.textAlign = "center";
-    canvasCtx.fillText(todo.text, 20, 25);
-  }, [canvasCtx]);
-
-  useEffect(() => {
-    if (!canvas) {
-      return;
-    }
-
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("touchmove", draw);
-    return () => {
-      canvas.removeEventListener("mousemove", draw);
-      canvas.removeEventListener("touchmove", draw);
-    };
-  }, [canvas, isDrawing]);
-
-  const startDrawing = () => {
-    setIsDrawing(true);
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
-    canvasCtx.beginPath();
-    countPixels();
-  };
-
-  const draw = (
-    e:
-      | React.MouseEvent<HTMLCanvasElement, MouseEvent>
-      | React.TouchEvent<HTMLCanvasElement>
-  ) => {
-    if (!isDrawing || !canvasCtx) {
-      return;
-    }
-
-    canvasCtx.lineWidth = 5;
-    canvasCtx.lineCap = "round";
-    canvasCtx.strokeStyle = "rgba(0, 0, 155, 0.1)";
-    canvasCtx.globalAlpha = 0.2;
-
-    const mousePosition = getMousePosition(e);
-
-    setLineHistory((lineHistory) => [
-      ...lineHistory,
-      { x: mousePosition.x, y: mousePosition.y },
-    ]);
-
-    canvasCtx.lineTo(mousePosition.x, mousePosition.y);
-    canvasCtx.stroke();
-  };
-
-  const getMousePosition = (
-    event:
-      | React.MouseEvent<HTMLCanvasElement, MouseEvent>
-      | React.TouchEvent<HTMLCanvasElement>
-  ) => {
-    const rect = canvas.getBoundingClientRect();
-    if (event instanceof MouseEvent) {
-      return {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      };
-    } else if (event instanceof TouchEvent) {
-      return {
-        x: event.touches[0].clientX - rect.left,
-        y: event.touches[0].clientY - rect.top,
-      };
-    }
-  };
-
-  const countPixels = () => {
-    let count = 0;
-    const imageData = canvasCtx.getImageData(0, 0, canvas.width, canvas.height)
-      .data;
-    for (let i = 0, y = 0; y < canvas.height; y++) {
-      for (let x = 0; x < canvas.width; x++, i += 4) {
-        if (imageData[i + 3]) {
-          count++;
+                svgRef.current.appendChild(el);
+                el.parentNode.appendChild(el);
+            });
         }
-      }
-    }
+    }, []);
 
-    const allPixels = CANVAS_HEIGHT * CANVAS_WIDTH;
-    console.log(count);
-    if (count > allPixels * 0.3) {
-      setTodo({ ...todo, isCompleted: true, _data: lineHistory });
-    }
-  };
+    useEffect(() => {
+        if (isDrawing) {
+            svgRef.current.addEventListener('mousemove', move);
+            svgRef.current.addEventListener('touchmove', move);
+        }
 
-  return (
-    <div className="todo-item">
-      <canvas
-        ref={canvasRef}
-        onMouseDown={startDrawing}
-        onMouseUp={stopDrawing}
-        onTouchStart={startDrawing}
-        onTouchEnd={stopDrawing}
-        className={classNames("todo-item__canvas", {
-          [`todo-item__canvas--${
-            todo.isCompleted ? "completed" : "not-completed"
-          }`]: true,
-        })}
-      ></canvas>
-    </div>
-  );
+        return () => {
+            if (isDrawing) {
+                svgRef.current.removeEventListener('mousemove', move);
+                svgRef.current.removeEventListener('touchmove', move);
+            }
+        };
+    }, [isDrawing]);
+
+    const cursorPoint = (e: MouseEvent | TouchEvent) => {
+        const point = svgRef.current.createSVGPoint();
+        if (e instanceof MouseEvent) {
+            point.x = e.clientX;
+            point.y = e.clientY;
+        } else {
+            point.x = e.touches[0].clientX;
+            point.y = e.touches[0].clientY;
+        }
+
+        return point.matrixTransform(svgRef.current.getScreenCTM().inverse());
+    };
+
+    const createElement = (element: string, properties: any) => {
+        var el = document.createElementNS(xmlns, element);
+        if (properties) {
+            for (var attr in properties) {
+                el.setAttribute(attr, properties[attr]);
+            }
+        }
+        return el;
+    };
+
+    const startDrawing = (e: MouseEvent | TouchEvent) => {
+        const startPoint = cursorPoint(e);
+
+        const el = createElement('path', {
+            'stroke-width': 1,
+            stroke: '#000',
+            fill: 'none',
+            d: `M${startPoint.x} ${startPoint.y} `,
+        });
+        svgRef.current.appendChild(el);
+        el.parentNode.appendChild(el);
+
+        setCurrentElement(el);
+
+        setIsDrawing(true);
+    };
+
+    const stopDrawing = () => {
+        if (isDrawing) {
+            setHistory((history) => [...history, currentElement.getAttribute('d')]);
+            countPixels();
+            setIsDrawing(false);
+        }
+    };
+
+    const move = (e: MouseEvent | TouchEvent) => {
+        const current = cursorPoint(e);
+        let d = currentElement.getAttribute('d');
+        currentElement.setAttribute('d', (d += current.x + ',' + current.y + ' '));
+    };
+
+    const countPixels = () => {
+        const { width, height } = svgRef.current.getBoundingClientRect();
+
+        let clonedSvgElement = svgRef.current.cloneNode(true);
+        let outerHTML = (clonedSvgElement as Element).outerHTML;
+        let blob = new Blob([outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+        let blobURL = URL.createObjectURL(blob);
+        let image = new Image();
+        image.src = blobURL;
+
+        image.onload = () => {
+            let canvas = document.createElement('canvas');
+
+            canvas.width = width;
+
+            canvas.height = height;
+            let context = canvas.getContext('2d');
+            // draw image in canvas starting left-0 , top - 0
+            context.drawImage(image, 0, 0, width, height);
+
+            let count = 0;
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
+            for (let i = 0, y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++, i += 4) {
+                    if (imageData[i + 3]) {
+                        count++;
+                    }
+                }
+            }
+
+            const allPixels = width * height;
+            console.log(count, allPixels);
+            if (count > allPixels * 0.1) {
+                setItem({
+                    ...item,
+                    isCompleted: true,
+                    _data: [...item._data, ...history],
+                });
+            }
+        };
+    };
+
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            ref={svgRef}
+            onMouseDown={(e) => startDrawing(e.nativeEvent)}
+            onTouchStart={(e) => startDrawing(e.nativeEvent)}
+            onTouchEnd={stopDrawing}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            className={classNames('todo-item', {
+                [`todo-item--${item.isCompleted ? 'completed' : 'not-completed'}`]: true,
+            })}
+        >
+            <text x="20" y="35" className="todo-item__text">
+                {item.text}
+            </text>
+        </svg>
+    );
 };

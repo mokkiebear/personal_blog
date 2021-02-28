@@ -1,0 +1,22 @@
+.todo-item {
+    border-radius: 10px;
+    height: 50px;
+    box-shadow: 1px 1px 10px grey;
+    margin: 8px 0;
+
+    path {
+        stroke-width: 2px;
+    }
+
+    &__text {
+        user-select: none;
+    }
+
+    &--completed {
+        background-color: green;
+    }
+
+    &--not-completed {
+        background-color: red;
+    }
+}
